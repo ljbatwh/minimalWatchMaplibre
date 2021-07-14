@@ -1,0 +1,47 @@
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+
+platform :ios, '12.0'
+
+target 'minimalWatchMaplibre' do
+#  use_frameworks!
+  config = use_native_modules!
+
+  use_react_native!(:path => config["reactNativePath"])
+
+  # Enables Flipper.
+  #
+  # Note that if you have use_frameworks! enabled, Flipper will not work and
+  # you should disable these next few lines.
+  # use_flipper!
+  # post_install do |installer|
+  #   flipper_post_install(installer)
+  # end
+end
+
+# Configure the map library
+useMapLibre = true
+
+if useMapLibre
+  $RNMBGL_Use_SPM = {
+    url: "https://github.com/maplibre/maplibre-gl-native-distribution",
+    requirement: {
+      exactVersion: "5.11.0"
+    },
+    product_name: "Mapbox"
+  }
+end
+
+pre_install do |installer|
+  $RNMBGL.pre_install(installer)
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if target.name == "React"
+      target.remove_from_project
+    end
+  end
+
+  $RNMBGL.post_install(installer)
+end
